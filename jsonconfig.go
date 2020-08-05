@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/toolkits/file"
@@ -37,6 +38,7 @@ type FileConfig struct {
 	Rotate   bool   `json:"rotate"`
 	Maxsize  string `json:"maxsize"`  // \d+[KMG]? Suffixes are in terms of 2**10
 	Maxlines string `json:"maxlines"` //\d+[KMG]? Suffixes are in terms of thousands
+	Maxbackups string `json:"maxbackups"` //\d+ Max number of backup files
 	Daily    bool   `json:"daily"`    //Automatically rotates by day
 	Sanitize bool   `json:"sanitize"` //Sanitize newlines to prevent log injection
 }
@@ -166,6 +168,7 @@ func jsonToFileLogWriter(filename string, ff *FileConfig) (*FileLogWriter, bool)
 	format := "[%D %T] [%C] [%L] (%S) %M"
 	maxlines := 0
 	maxsize := 0
+	maxbackups := 5
 	daily := false
 	rotate := false
 	sanitize := false
@@ -182,6 +185,9 @@ func jsonToFileLogWriter(filename string, ff *FileConfig) (*FileLogWriter, bool)
 	if len(ff.Maxsize) > 0 {
 		maxsize = strToNumSuffix(strings.Trim(ff.Maxsize, " \r\n"), 1024)
 	}
+	if len(ff.Maxbackups) > 0 {
+		maxbackups, _ = strconv.Atoi(strings.Trim(ff.Maxbackups, " \r\n"))
+	}
 	daily = ff.Daily
 	rotate = ff.Rotate
 	sanitize = ff.Sanitize
@@ -194,6 +200,7 @@ func jsonToFileLogWriter(filename string, ff *FileConfig) (*FileLogWriter, bool)
 	flw.SetFormat(format)
 	flw.SetRotateLines(maxlines)
 	flw.SetRotateSize(maxsize)
+	flw.SetRotateMaxBackup(maxbackups)
 	flw.SetSanitize(sanitize)
 	return flw, true
 }

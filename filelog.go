@@ -71,7 +71,7 @@ func NewFileLogWriter(fname string, rotate bool, daily bool) *FileLogWriter {
 		format:    "[%D %T] [%L] (%S) %M",
 		daily:     daily,
 		rotate:    rotate,
-		maxbackup: 999,
+		maxbackup: 5,
 		sanitize:  false, // set to false so as not to break compatibility
 	}
 	// open the file for the first time
